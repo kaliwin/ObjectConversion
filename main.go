@@ -4,6 +4,9 @@ import "github.com/kaliwin/ObjectConversion/cli"
 
 func main() {
 
-	cli.RootCmd.Execute()
+	err := cli.RootCmd.Execute()
+	if err != nil {
+		panic(err)
+	}
 
 }
