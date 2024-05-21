@@ -21,4 +21,5 @@ func init() {
 
 	//ConversionHttpCmd.Flags().StringVarP(&name, "as", "s", "转换的名称", "s")
 	ConversionHttpCmd.AddCommand(burpCmd)
+	ConversionHttpCmd.AddCommand(IntegrateCmd)
 }
