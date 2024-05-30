@@ -98,6 +98,8 @@ func Diversion(rawPath string, urlFilter string, outPath string) {
 				//	//fmt.Println(bodySign)
 				//}
 
+				res.Info.Info = fileName // 将文件id写入info
+
 				marshal, err := proto.Marshal(res)
 				if err != nil {
 					panic(err)
