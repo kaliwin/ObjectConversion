@@ -17,7 +17,7 @@ import (
 var IntegrateCmd = &cobra.Command{
 	Use:   "integrate",
 	Short: "数据整合",
-	Long:  "将http数据通过url进行分类整合,可参照burp中的map",
+	Long:  "将http数据通过url进行分类整合 并且会写入唯一标识符,可参照burp中的map",
 	Run: func(cmd *cobra.Command, args []string) {
 		if output == "" || RawPath == "" {
 			cmd.Help()
@@ -27,15 +27,16 @@ var IntegrateCmd = &cobra.Command{
 	},
 }
 
-var filter string
-var output string
-var RawPath string
+var filter string  // 过滤条件
+var output string  // 目标目录
+var RawPath string // 原始数据目录
 
 func init() {
 
 	IntegrateCmd.Flags().StringVarP(&filter, "filter", "f", "", "url过滤条件 例如: -f www.baidu.com")
 	IntegrateCmd.Flags().StringVarP(&output, "output", "o", "", "输出文件目录")
-	IntegrateCmd.Flags().StringVarP(&RawPath, "RawPath", "r", "", "原始数据目录")
+	IntegrateCmd.Flags().StringVarP(&RawPath, "rawPath", "r", "", "原始数据目录")
+
 }
 
 // Diversion 数据分流
@@ -70,7 +71,6 @@ func Diversion(rawPath string, urlFilter string, outPath string) {
 				}
 
 				path := parse.Path
-				fileName := "" // 默认文件名
 
 				if i := strings.LastIndex(path, "/"); i != -1 { // 路径中有/
 					if i != len(path)-1 { // 不是最后一个字符
@@ -84,22 +84,15 @@ func Diversion(rawPath string, urlFilter string, outPath string) {
 					}
 				}
 
-				//fileName = sign.UrlSign(parse)
-
-				fileName, err = sign.HttpBleveIdSign(res)
-				if err != nil {
-					panic(err)
-				}
-
-				//if bytes := res.GetRes().GetData(); len(bytes) > 1 { // 响应体不为空
-				//	bytesC := bytes[res.GetRes().BodyIndex:]
-				//	bodySign := BodySign(bytesC)
-				//	fileName += "-B" + bodySign
-				//	//fmt.Println(bodySign)
-				//}
-
-				res.Info = &HttpStructureStandard.HttpInfo{
-					Info: fileName,
+				fileName := res.GetInfo().GetInfo() // info 是否事先有签名
+				if fileName == "" {
+					fileName, err = sign.HttpBleveIdSign(res)
+					if err != nil {
+						panic(err)
+					}
+					res.Info = &HttpStructureStandard.HttpInfo{
+						Info: fileName,
+					}
 				}
 
 				marshal, err := proto.Marshal(res)

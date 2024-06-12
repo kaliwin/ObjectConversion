@@ -8,7 +8,7 @@ import (
 
 var burpCmd = &cobra.Command{
 	Use:   "burp",
-	Short: "burp流量转换",
+	Short: "接受burp流量转换为proto格式的http组列表",
 	Long:  "通过MorePossibility-Burp插件导出的流量转换为proto格式的http组",
 	Run: func(cmd *cobra.Command, args []string) {
 		if bo.address == "" || bo.fileOutPath == "" {

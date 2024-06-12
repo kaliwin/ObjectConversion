@@ -19,9 +19,9 @@ import (
 // BurpFlowToHttpRawByteStreamList Burp流转换为HttpRawByteStreamList
 // 可使用实时流量镜像 、 proxy / map 导出
 type BurpFlowToHttpRawByteStreamList struct {
-	outPath string // 输出目录
-	tmpList *HttpStructureStandard.HttpRawByteStreamList
-	tmpSize int
+	OutPath string // 输出目录
+	TmpList *HttpStructureStandard.HttpRawByteStreamList
+	TmpSize int
 	MaxSize int
 }
 
@@ -35,28 +35,28 @@ func (b *BurpFlowToHttpRawByteStreamList) RealTimeTrafficMirroring(server *HttpS
 func (b *BurpFlowToHttpRawByteStreamList) WriteFile(d *HttpStructureStandard.HttpReqAndRes) error {
 
 	if d != nil {
-		b.tmpSize += len(d.GetReq().GetData()) + len(d.GetRes().GetData())
-		b.tmpList.HttpRawByteStreamList = append(b.tmpList.GetHttpRawByteStreamList(), d)
+		b.TmpSize += len(d.GetReq().GetData()) + len(d.GetRes().GetData())
+		b.TmpList.HttpRawByteStreamList = append(b.TmpList.GetHttpRawByteStreamList(), d)
 	}
 
-	if b.tmpSize > b.MaxSize { // 超过最大限制
+	if b.TmpSize > b.MaxSize { // 超过最大限制
 
-		if len(b.tmpList.HttpRawByteStreamList) == 0 {
+		if len(b.TmpList.HttpRawByteStreamList) == 0 {
 			return nil
 		}
-		marshal, err := proto.Marshal(b.tmpList)
+		marshal, err := proto.Marshal(b.TmpList)
 		if err != nil {
 			return err
 		}
 
-		fileName := fmt.Sprintf("%d-%s.proto", len(b.tmpList.HttpRawByteStreamList), uuid.New().String())
+		fileName := fmt.Sprintf("%d-%s.proto", len(b.TmpList.HttpRawByteStreamList), uuid.New().String())
 
-		err = os.WriteFile(b.outPath+"/"+fileName, marshal, 0666)
+		err = os.WriteFile(b.OutPath+"/"+fileName, marshal, 0666)
 
-		log.Println("写入文件", b.outPath+"/"+fileName, "成功")
+		log.Println("写入文件", b.OutPath+"/"+fileName)
 
-		b.tmpSize = 0
-		b.tmpList = &HttpStructureStandard.HttpRawByteStreamList{}
+		b.TmpSize = 0
+		b.TmpList = &HttpStructureStandard.HttpRawByteStreamList{}
 
 		return err
 	}
@@ -89,13 +89,13 @@ func BuildBurpFlowToHttpRawByteStreamListServer(address string, outPath string) 
 	// 将收到的信号发送到 sigChan
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
-	list := BurpFlowToHttpRawByteStreamList{outPath: outPath, MaxSize: 20 * 1024 * 1024, tmpList: &HttpStructureStandard.HttpRawByteStreamList{}}
+	list := BurpFlowToHttpRawByteStreamList{OutPath: outPath, MaxSize: 20 * 1024 * 1024, TmpList: &HttpStructureStandard.HttpRawByteStreamList{}}
 
 	go func() {
 		<-sigChan
 		fmt.Print("\r")      // 光标移动到行首
 		fmt.Print("\033[2K") // 清除当前行
-		list.tmpSize = 2
+		list.TmpSize = 2
 		list.MaxSize = 0
 		_ = list.WriteFile(nil)
 
