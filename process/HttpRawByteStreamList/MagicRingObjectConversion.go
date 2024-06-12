@@ -9,7 +9,6 @@ import (
 	"github.com/kaliwin/Needle/PublicStandard/HttpStructureStandard/grpc/HttpStructureStandard"
 	"github.com/kaliwin/Needle/PublicStandard/sign"
 	"google.golang.org/grpc"
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -66,7 +65,7 @@ func (b *BurpFlowToHttpRawByteStreamList) WriteFile(d *HttpStructureStandard.Htt
 
 		err = os.WriteFile(b.OutPath+"/"+fileName, marshal, 0666)
 
-		log.Println("写入文件", b.OutPath+"/"+fileName)
+		//log.Println("写入文件", b.OutPath+"/"+fileName)
 
 		b.TmpSize = 0
 		b.TmpList = &HttpStructureStandard.HttpRawByteStreamList{}
