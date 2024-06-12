@@ -110,7 +110,7 @@ func Diversion(rawPath string, urlFilter string, outPath string) error {
 					return err
 				}
 
-				filePath := dir + "/" + fileName + ".proto"
+				filePath := dir + "/" + fileName + ".httpGroup"
 
 				if _, err := os.Stat(filePath); err == nil { // 文件存在
 

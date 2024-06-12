@@ -61,7 +61,7 @@ func (b *BurpFlowToHttpRawByteStreamList) WriteFile(d *HttpStructureStandard.Htt
 			return err
 		}
 
-		fileName := fmt.Sprintf("%d-%s.proto", len(b.TmpList.HttpRawByteStreamList), uuid.New().String())
+		fileName := fmt.Sprintf("%d-%d.httpList", len(b.TmpList.HttpRawByteStreamList), uuid.New().ID())
 
 		err = os.WriteFile(b.OutPath+"/"+fileName, marshal, 0666)
 
