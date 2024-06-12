@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/kaliwin/Needle/MorePossibilityApi"
 	"github.com/kaliwin/Needle/PublicStandard/HttpStructureStandard/grpc/HttpStructureStandard"
+	"github.com/kaliwin/Needle/PublicStandard/sign"
 	"google.golang.org/grpc"
 	"log"
 	"os"
@@ -35,6 +36,18 @@ func (b *BurpFlowToHttpRawByteStreamList) RealTimeTrafficMirroring(server *HttpS
 func (b *BurpFlowToHttpRawByteStreamList) WriteFile(d *HttpStructureStandard.HttpReqAndRes) error {
 
 	if d != nil {
+
+		fileName := d.GetInfo().GetInfo() // info 是否事先有签名
+		if fileName == "" {
+			fileName, err := sign.HttpBleveIdSign(d) // 签名
+			if err != nil {
+				return err
+			}
+			d.Info = &HttpStructureStandard.HttpInfo{
+				Info: fileName,
+			}
+		}
+
 		b.TmpSize += len(d.GetReq().GetData()) + len(d.GetRes().GetData())
 		b.TmpList.HttpRawByteStreamList = append(b.TmpList.GetHttpRawByteStreamList(), d)
 	}
