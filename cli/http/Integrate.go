@@ -3,7 +3,6 @@ package http
 import (
 	"crypto/md5"
 	"encoding/hex"
-	"errors"
 	Interface "github.com/kaliwin/Needle/MagicRing/Integrate"
 	"github.com/kaliwin/Needle/PublicStandard/HttpStructureStandard/grpc/HttpStructureStandard"
 	"github.com/kaliwin/Needle/PublicStandard/ObjectHandling"
@@ -115,7 +114,7 @@ func Diversion(rawPath string, urlFilter string, outPath string) error {
 
 				if _, err := os.Stat(filePath); err == nil { // 文件存在
 
-					return errors.New("file is exists")
+					continue
 
 				} else { // 文件不存在
 					err = os.WriteFile(filePath, marshal, os.ModePerm) // 写入文件
