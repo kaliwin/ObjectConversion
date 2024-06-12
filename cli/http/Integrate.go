@@ -3,6 +3,7 @@ package http
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"errors"
 	Interface "github.com/kaliwin/Needle/MagicRing/Integrate"
 	"github.com/kaliwin/Needle/PublicStandard/HttpStructureStandard/grpc/HttpStructureStandard"
 	"github.com/kaliwin/Needle/PublicStandard/ObjectHandling"
@@ -23,7 +24,10 @@ var IntegrateCmd = &cobra.Command{
 			cmd.Help()
 			return
 		}
-		Diversion(RawPath, filter, output)
+		err := Diversion(RawPath, filter, output)
+		if err != nil {
+			cmd.Println(err)
+		}
 	},
 }
 
@@ -41,10 +45,10 @@ func init() {
 
 // Diversion 数据分流
 // urlFilter 过滤条件 要包含的url
-func Diversion(rawPath string, urlFilter string, outPath string) {
+func Diversion(rawPath string, urlFilter string, outPath string) error {
 	stream, err := ObjectHandling.BuildFIleObjectStream(rawPath, true, Interface.ObjectTypeHttpGroupListProto)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	for {
@@ -67,7 +71,7 @@ func Diversion(rawPath string, urlFilter string, outPath string) {
 
 				parse, err := url.Parse(u)
 				if err != nil {
-					panic(err)
+					return err
 				}
 
 				path := parse.Path
@@ -88,7 +92,7 @@ func Diversion(rawPath string, urlFilter string, outPath string) {
 				if fileName == "" {
 					fileName, err = sign.HttpBleveIdSign(res)
 					if err != nil {
-						panic(err)
+						return err
 					}
 					res.Info = &HttpStructureStandard.HttpInfo{
 						Info: fileName,
@@ -97,31 +101,32 @@ func Diversion(rawPath string, urlFilter string, outPath string) {
 
 				marshal, err := proto.Marshal(res)
 				if err != nil {
-					panic(err)
+					return err
 				}
 
 				dir := outPath + "/" + parse.Host + "/" + path
 
 				err = os.MkdirAll(dir, os.ModePerm) // 创建目录
 				if err != nil {
-					panic(err)
+					return err
 				}
 
 				filePath := dir + "/" + fileName + ".proto"
 
 				if _, err := os.Stat(filePath); err == nil { // 文件存在
 
-					panic("文件还是存在")
+					return errors.New("file is exists")
 
 				} else { // 文件不存在
 					err = os.WriteFile(filePath, marshal, os.ModePerm) // 写入文件
 					if err != nil {
-						panic(err)
+						return err
 					}
 				}
 			}
 		}
 	}
+	return nil
 }
 
 // BodySign 体签名
