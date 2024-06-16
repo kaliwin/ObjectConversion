@@ -1,9 +1,9 @@
 package http
 
 import (
-	Interface "github.com/kaliwin/Needle/MagicRing/Integrate"
+	"github.com/kaliwin/Needle/IO"
+	"github.com/kaliwin/Needle/IO/Interface"
 	"github.com/kaliwin/Needle/PublicStandard/HttpStructureStandard/grpc/HttpStructureStandard"
-	"github.com/kaliwin/Needle/PublicStandard/ObjectHandling"
 	"github.com/kaliwin/ObjectConversion/process/HttpRawByteStreamList"
 	"github.com/spf13/cobra"
 	"io"
@@ -38,7 +38,12 @@ func Merge(RawPath string, output string, size int) error {
 		OutPath: output, MaxSize: size * 1024 * 1024, TmpList: &HttpStructureStandard.HttpRawByteStreamList{},
 	}
 
-	stream, err := ObjectHandling.BuildFIleObjectStream(RawPath, true, Interface.ObjectTypeHttpGroupProto)
+	stream, err := IO.BuildResourceDescriptionRead(Interface.ResourceDescription{
+		Protocol:   Interface.IOFile,
+		Path:       RawPath,
+		ObjectType: Interface.ObjectTypeHttpGroupProto,
+		Config:     nil,
+	})
 	if err != nil {
 		return err
 	}

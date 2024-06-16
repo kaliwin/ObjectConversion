@@ -3,9 +3,9 @@ package http
 import (
 	"crypto/md5"
 	"encoding/hex"
-	Interface "github.com/kaliwin/Needle/MagicRing/Integrate"
+	"github.com/kaliwin/Needle/IO"
+	"github.com/kaliwin/Needle/IO/Interface"
 	"github.com/kaliwin/Needle/PublicStandard/HttpStructureStandard/grpc/HttpStructureStandard"
-	"github.com/kaliwin/Needle/PublicStandard/ObjectHandling"
 	"github.com/kaliwin/Needle/PublicStandard/sign"
 	"github.com/spf13/cobra"
 	"google.golang.org/protobuf/proto"
@@ -45,7 +45,13 @@ func init() {
 // Diversion 数据分流
 // urlFilter 过滤条件 要包含的url
 func Diversion(rawPath string, urlFilter string, outPath string) error {
-	stream, err := ObjectHandling.BuildFIleObjectStream(rawPath, true, Interface.ObjectTypeHttpGroupListProto)
+
+	stream, err := IO.BuildResourceDescriptionRead(Interface.ResourceDescription{
+		Protocol:   Interface.IOFile,
+		Path:       rawPath,
+		ObjectType: Interface.ObjectTypeHttpGroupListProto,
+		Config:     nil,
+	})
 	if err != nil {
 		return err
 	}

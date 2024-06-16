@@ -23,5 +23,6 @@ func init() {
 	ConversionHttpCmd.AddCommand(burpCmd)
 	ConversionHttpCmd.AddCommand(IntegrateCmd)
 	ConversionHttpCmd.AddCommand(MergeCmd)
+	ConversionHttpCmd.AddCommand(AggregationCmd)
 
 }
