@@ -2,13 +2,14 @@ package HttpRawByteStreamList
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
-	"github.com/golang/protobuf/proto"
-	"github.com/google/uuid"
 	"github.com/kaliwin/Needle/MorePossibilityApi"
 	"github.com/kaliwin/Needle/PublicStandard/HttpStructureStandard/grpc/HttpStructureStandard"
 	"github.com/kaliwin/Needle/PublicStandard/sign"
 	"google.golang.org/grpc"
+	"google.golang.org/protobuf/proto"
 	"os"
 	"os/signal"
 	"syscall"
@@ -36,14 +37,11 @@ func (b *BurpFlowToHttpRawByteStreamList) WriteFile(d *HttpStructureStandard.Htt
 
 	if d != nil {
 
-		fileName := d.GetInfo().GetInfo() // info 是否事先有签名
-		if fileName == "" {
-			fileName, err := sign.HttpBleveIdSign(d) // 签名
-			if err != nil {
-				return err
-			}
+		id := d.GetInfo().GetId() // info 是否事先有签名
+		if id == "" {
+			id = sign.HttpBleveIdSign(d) // 签名
 			d.Info = &HttpStructureStandard.HttpInfo{
-				Info: fileName,
+				Id: id,
 			}
 		}
 
@@ -61,11 +59,15 @@ func (b *BurpFlowToHttpRawByteStreamList) WriteFile(d *HttpStructureStandard.Htt
 			return err
 		}
 
-		fileName := fmt.Sprintf("%d-%d.httpList", len(b.TmpList.HttpRawByteStreamList), uuid.New().ID())
+		sum256 := sha256.Sum256(marshal)
+
+		name := hex.EncodeToString(sum256[:])
+
+		fileName := fmt.Sprintf("%s.httpList", name)
 
 		err = os.WriteFile(b.OutPath+"/"+fileName, marshal, 0666)
 
-		//log.Println("写入文件", b.OutPath+"/"+fileName)
+		fmt.Println("写入 >>> " + b.OutPath + "/" + fileName)
 
 		b.TmpSize = 0
 		b.TmpList = &HttpStructureStandard.HttpRawByteStreamList{}

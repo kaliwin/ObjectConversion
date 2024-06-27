@@ -93,14 +93,12 @@ func Diversion(rawPath string, urlFilter string, outPath string) error {
 					}
 				}
 
-				fileName := res.GetInfo().GetInfo() // info 是否事先有签名
+				fileName := res.GetInfo().GetId() // info 是否事先有签名
 				if fileName == "" {
-					fileName, err = sign.HttpBleveIdSign(res)
-					if err != nil {
-						return err
-					}
+					fileName = sign.HttpBleveIdSign(res)
+
 					res.Info = &HttpStructureStandard.HttpInfo{
-						Info: fileName,
+						Id: fileName,
 					}
 				}
 

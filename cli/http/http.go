@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var Init bool
+//var Init bool
 
 var name = ""
 
