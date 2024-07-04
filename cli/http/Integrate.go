@@ -1,8 +1,6 @@
 package http
 
 import (
-	"crypto/md5"
-	"encoding/hex"
 	"github.com/kaliwin/Needle/IO"
 	"github.com/kaliwin/Needle/IO/Interface"
 	"github.com/kaliwin/Needle/PublicStandard/HttpStructureStandard/grpc/HttpStructureStandard"
@@ -115,6 +113,11 @@ func Diversion(rawPath string, outPath string) error {
 						}
 					}
 				}
+
+				if len(path) > 30 {
+					path = "long"
+				}
+
 				dir := outPath
 				if !onlyDir {
 					dir += "/" + parse.Host + "/" + path
@@ -142,12 +145,4 @@ func Diversion(rawPath string, outPath string) error {
 		}
 	}
 	return nil
-}
-
-// BodySign 体签名
-func BodySign(b []byte) string {
-	var d []byte
-	bytes := md5.Sum(b)
-	d = append(d, bytes[12:]...)
-	return hex.EncodeToString(d)
 }

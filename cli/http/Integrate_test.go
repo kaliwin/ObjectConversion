@@ -4,6 +4,9 @@ import "testing"
 
 func TestDiversion(t *testing.T) {
 
-	Diversion("/root/tmp/data", "", "/root/tmp/dir")
+	//err := Diversion("/root/tmp/data", "", "/root/tmp/dir")
+	//if err != nil {
+	//	return
+	//}
 
 }

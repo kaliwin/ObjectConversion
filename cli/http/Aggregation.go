@@ -19,7 +19,7 @@ var AggregationCmd = &cobra.Command{
 			_ = cmd.Help()
 			return
 		}
-		aggregation := FieldAggregation.NewResFieldAggregation(output)
+		aggregation := FieldAggregation.NewResFieldAggregation(output) // 创建聚合
 
 		read, err := IO.BuildResourceDescriptionRead(Interface.ResourceDescription{
 			Protocol:   Interface.IOFile,
@@ -36,7 +36,7 @@ var AggregationCmd = &cobra.Command{
 		read.Iteration(func(a any) bool {
 			if list, ok := a.(*HttpStructureStandard.HttpRawByteStreamList); ok {
 				for _, res := range list.GetHttpRawByteStreamList() {
-					err2 := aggregation.Accepting(res)
+					err2 := aggregation.Accepting(res) // 执行聚合
 					if err2 != nil {
 						panic(err2)
 					}
