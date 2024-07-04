@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"github.com/kaliwin/Needle/MorePossibilityApi"
 	"github.com/kaliwin/Needle/PublicStandard/HttpStructureStandard/grpc/HttpStructureStandard"
-	"github.com/kaliwin/Needle/PublicStandard/sign"
+	"github.com/kaliwin/Needle/PublicStandard/sign/HashingSign"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/proto"
 	"os"
@@ -39,10 +39,8 @@ func (b *BurpFlowToHttpRawByteStreamList) WriteFile(d *HttpStructureStandard.Htt
 
 		id := d.GetInfo().GetId() // info 是否事先有签名
 		if id == "" {
-			id = sign.HttpBleveIdSign(d) // 签名
-			d.Info = &HttpStructureStandard.HttpInfo{
-				Id: id,
-			}
+			id = HashingSign.Sha256HttpGroup(d)
+			d.Info = &HttpStructureStandard.HttpInfo{Id: id}
 		}
 
 		b.TmpSize += len(d.GetReq().GetData()) + len(d.GetRes().GetData())

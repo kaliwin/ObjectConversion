@@ -11,8 +11,4 @@ func main() {
 		panic(err)
 	}
 
-	//fmt.Println(http.BodySign([]byte("cyvk")))
-
-	//http.Diversion("/root/tmp/data", "", "/root/tmp/dir")
-
 }

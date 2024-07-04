@@ -12,7 +12,7 @@ var burpCmd = &cobra.Command{
 	Long:  "通过MorePossibility-Burp插件导出的流量转换为proto格式的http组",
 	Run: func(cmd *cobra.Command, args []string) {
 		if bo.address == "" || bo.fileOutPath == "" {
-			cmd.Help()
+			_ = cmd.Help()
 			return
 		}
 		server, err := HttpRawByteStreamList.BuildBurpFlowToHttpRawByteStreamListServer(bo.address, bo.fileOutPath)
@@ -21,7 +21,10 @@ var burpCmd = &cobra.Command{
 			return
 		}
 		log.Println("服务启动成功 : " + bo.address)
-		server.Start()
+		err = server.Start()
+		if err != nil {
+			panic(err)
+		}
 
 	},
 }

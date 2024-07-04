@@ -6,9 +6,10 @@ import (
 	"github.com/kaliwin/Needle/IO"
 	"github.com/kaliwin/Needle/IO/Interface"
 	"github.com/kaliwin/Needle/PublicStandard/HttpStructureStandard/grpc/HttpStructureStandard"
-	"github.com/kaliwin/Needle/PublicStandard/sign"
+	"github.com/kaliwin/Needle/PublicStandard/sign/HashingSign"
 	"github.com/spf13/cobra"
 	"google.golang.org/protobuf/proto"
+	"log"
 	"net/url"
 	"os"
 	"strings"
@@ -23,28 +24,32 @@ var IntegrateCmd = &cobra.Command{
 			cmd.Help()
 			return
 		}
-		err := Diversion(RawPath, filter, output)
+		err := Diversion(RawPath, output)
 		if err != nil {
 			cmd.Println(err)
 		}
 	},
 }
 
-var filter string  // 过滤条件
+// var filter string  // 过滤条件
 var output string  // 目标目录
 var RawPath string // 原始数据目录
 
-func init() {
+var onlyHost bool // 只有host
 
-	IntegrateCmd.Flags().StringVarP(&filter, "filter", "f", "", "url过滤条件 例如: -f www.baidu.com")
+var onlyDir bool
+
+func init() {
+	//IntegrateCmd.Flags().StringVarP(&filter, "filter", "f", "", "url过滤条件 例如: -f www.baidu.com")
 	IntegrateCmd.Flags().StringVarP(&output, "output", "o", "", "输出文件目录")
 	IntegrateCmd.Flags().StringVarP(&RawPath, "rawPath", "r", "", "原始数据目录")
-
+	IntegrateCmd.Flags().BoolVarP(&onlyHost, "onlyHost", "H", false, "只放到host下不会创建path目录")
+	IntegrateCmd.Flags().BoolVarP(&onlyDir, "onlyDir", "D", false, "只放在dir下不会额外创建目录")
 }
 
 // Diversion 数据分流
 // urlFilter 过滤条件 要包含的url
-func Diversion(rawPath string, urlFilter string, outPath string) error {
+func Diversion(rawPath string, outPath string) error {
 
 	stream, err := IO.BuildResourceDescriptionRead(Interface.ResourceDescription{
 		Protocol:   Interface.IOFile,
@@ -70,60 +75,67 @@ func Diversion(rawPath string, urlFilter string, outPath string) error {
 
 				u := res.GetReq().GetUrl()
 				//fmt.Println(u)
-				if !strings.Contains(u, urlFilter) { // 过滤条件
-					continue
-				}
+				//if !strings.Contains(u, urlFilter) { // 过滤条件
+				//	continue
+				//}
 
 				parse, err := url.Parse(u)
 				if err != nil {
-					return err
-				}
-
-				path := parse.Path
-
-				if i := strings.LastIndex(path, "/"); i != -1 { // 路径中有/
-					if i != len(path)-1 { // 不是最后一个字符
-						//fileName = path[i+1:]
-						path = path[:i]
-					} else { // 是最后一个字符
-						if j := strings.LastIndex(path[:i], "/"); j != -1 {
-							//fileName = path[j+1 : len(path)-1]
-							path = path[:j]
-						}
-					}
+					log.Println(err)
+					continue
 				}
 
 				fileName := res.GetInfo().GetId() // info 是否事先有签名
 				if fileName == "" {
-					fileName = sign.HttpBleveIdSign(res)
+					//fileName = sign.HttpBleveIdSign(res)
+					fileName = HashingSign.Sha256HttpGroup(res)
 
-					res.Info = &HttpStructureStandard.HttpInfo{
-						Id: fileName,
-					}
+					res.Info = &HttpStructureStandard.HttpInfo{Id: fileName}
 				}
 
 				marshal, err := proto.Marshal(res)
 				if err != nil {
-					return err
+					log.Println(err)
+					continue
 				}
 
-				dir := outPath + "/" + parse.Host + "/" + path
+				path := ""
 
-				err = os.MkdirAll(dir, os.ModePerm) // 创建目录
-				if err != nil {
-					return err
+				if !onlyHost {
+					path = parse.Path
+					if i := strings.LastIndex(path, "/"); i != -1 { // 路径中有/
+						if i != len(path)-1 { // 不是最后一个字符
+							//fileName = path[i+1:]
+							path = path[:i]
+						} else { // 是最后一个字符
+							if j := strings.LastIndex(path[:i], "/"); j != -1 {
+								//fileName = path[j+1 : len(path)-1]
+								path = path[:j]
+							}
+						}
+					}
+				}
+				dir := outPath
+				if !onlyDir {
+					dir += "/" + parse.Host + "/" + path
+
+					err = os.MkdirAll(dir, os.ModePerm) // 创建目录
+					if err != nil {
+						log.Println(err)
+						continue
+					}
 				}
 
 				filePath := dir + "/" + fileName + ".httpGroup"
 
 				if _, err := os.Stat(filePath); err == nil { // 文件存在
-
 					continue
 
 				} else { // 文件不存在
 					err = os.WriteFile(filePath, marshal, os.ModePerm) // 写入文件
 					if err != nil {
-						return err
+						log.Println(err)
+						continue
 					}
 				}
 			}

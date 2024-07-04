@@ -3,8 +3,7 @@ module github.com/kaliwin/ObjectConversion
 go 1.22
 
 require (
-	github.com/google/uuid v1.6.0 // indirect
-	github.com/kaliwin/Needle v1.0.18
+	github.com/kaliwin/Needle v1.0.20
 	github.com/spf13/cobra v1.8.1
 	google.golang.org/grpc v1.64.0
 )
