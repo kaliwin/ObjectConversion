@@ -25,4 +25,5 @@ func init() {
 	ConversionHttpCmd.AddCommand(MergeCmd)
 	ConversionHttpCmd.AddCommand(AggregationCmd)
 	ConversionHttpCmd.AddCommand(ProxyImportCmd)
+	ConversionHttpCmd.AddCommand(byteSeparationCmd)
 }

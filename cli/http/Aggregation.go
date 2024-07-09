@@ -19,7 +19,7 @@ var AggregationCmd = &cobra.Command{
 			_ = cmd.Help()
 			return
 		}
-		aggregation := FieldAggregation.NewResFieldAggregation(output) // 创建聚合
+		aggregation := FieldAggregation.NewResBodyFieldAggregation(output) // 创建聚合
 
 		read, err := IO.BuildResourceDescriptionRead(Interface.ResourceDescription{
 			Protocol:   Interface.IOFile,
@@ -50,7 +50,10 @@ var AggregationCmd = &cobra.Command{
 	},
 }
 
+var isClassification bool
+
 func init() {
 	AggregationCmd.Flags().StringVarP(&output, "output", "o", "", "输出文件目录")
 	AggregationCmd.Flags().StringVarP(&RawPath, "rawPath", "r", "", "原始数据目录")
+	AggregationCmd.Flags().BoolVarP(&isClassification, "classification", "c", false, "是否分类")
 }
