@@ -22,7 +22,7 @@ var IntegrateCmd = &cobra.Command{
 			cmd.Help()
 			return
 		}
-		err := Diversion(RawPath, output)
+		err := Diversion(RawPath, output, onlyHost, onlyDir)
 		if err != nil {
 			cmd.Println(err)
 		}
@@ -47,7 +47,7 @@ func init() {
 
 // Diversion 数据分流
 // urlFilter 过滤条件 要包含的url
-func Diversion(rawPath string, outPath string) error {
+func Diversion(rawPath string, outPath string, onlyHost bool, onlyDir bool) error {
 
 	stream, err := IO.BuildResourceDescriptionRead(Interface.ResourceDescription{
 		Protocol:   Interface.IOFile,
